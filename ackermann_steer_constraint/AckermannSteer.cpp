@@ -20,15 +20,15 @@ int ackermann::presolve() {return 0;};
 int ackermann::postsolve() {return 0;};
 
 int ackermann::environment() {
-	// Two constraints: Lateral velocity is zero, and the curvature (k) is proportional to the steer angle (alpha) and wheel base (wb)
+  // Two constraints: Lateral velocity is zero, and the curvature (k) is proportional to the steer angle (alpha) and wheel base (wb)
   // k = tan(alpha)/wb
-	//    yawrate*wb - tan(alpha)*velocity = 0          
+  //    yawrate*wb - tan(alpha)*velocity = 0          
   //    (yawaxis*wb*Jr-tan(alpha)*fwdaxis*Jt)*qdot = 0
-	// J*qdotdot - (sec^2(alpha)*alphadot*fwdaxis)*J*qdot = 0
-	if (manifold==NULL)
+  // J*qdotdot - (sec^2(alpha)*alphadot*fwdaxis)*J*qdot = 0
+  if (manifold==NULL)
     ConstraintInit();
     
-	int ndof = NM::NM_MODEL_NDOFS();
+  int ndof = NM::NM_MODEL_NDOFS();
   mat State = state->dmatrix();
   mat origin = zeros(1,3);
   mat R = bodyRotation->dmatrix();
@@ -37,24 +37,24 @@ int ackermann::environment() {
   mat Jr = J.J.rows(3,5);     mat dJr = J.dJdt_dQdt.rows(3,5);
   mat Jt = J.J.rows(0,2);     mat dJt = J.dJdt_dQdt.rows(0,2);
   
-	mat localVelocity = zeros(1,3);
-	mat vOrigint = NM::GlobalVelocity(origin, localVelocity, bodyindex); // = J*qdot
+  mat localVelocity = zeros(1,3);
+  mat vOrigint = NM::GlobalVelocity(origin, localVelocity, bodyindex); // = J*qdot
   mat vOriginr = (Jr*State.cols(ndof,2*ndof-1).t()).t();
   mat yax = R*yawaxis;    mat dyax = dRdt*yawaxis;
-	mat vax = R*fwdaxis;    mat dvax = dRdt*fwdaxis;
-	mat lax = R*lataxis;    mat dlax = dRdt*lataxis;
+  mat vax = R*fwdaxis;    mat dvax = dRdt*fwdaxis;
+  mat lax = R*lataxis;    mat dlax = dRdt*lataxis;
   double tA = tan(State(0,steerdofi));
   double dtA = State(0,ndof+steerdofi) * pow(1/cos(State(0,steerdofi)),2);
   // Build constraint
-	mat cmanifold = zeros(2,ndof);
+  mat cmanifold = zeros(2,ndof);
   // CAN I DO THIS (yawaxis.t()*Jr)???
-	cmanifold.row(0) = wheelbase*yax.t()*Jr-tA*vax.t()*Jt;
-	cmanifold.row(1) = lax.t()*Jt;
+  cmanifold.row(0) = wheelbase*yax.t()*Jr-tA*vax.t()*Jt;
+  cmanifold.row(1) = lax.t()*Jt;
   
   //cmanifold.raw_print("CM:");
-	mat positionerror = zeros(1,2);
-	mat velocityerror = -State.cols(ndof,2*ndof-1)*cmanifold.t();
-	mat acceleration  = zeros(1,2);
+  mat positionerror = zeros(1,2);
+  mat velocityerror = -State.cols(ndof,2*ndof-1)*cmanifold.t();
+  mat acceleration  = zeros(1,2);
   
   mat acc0 = -wheelbase*(yax.t()*dJr + vOriginr*dyax)
             -tA*(vax.t()*dJt+vOrigint*dvax) + dtA * (vOrigint*vax);
@@ -63,13 +63,13 @@ int ackermann::environment() {
   acceleration(0,1) = acc1(0,0);
   //lax.t().raw_print("LateralAxis_Global:");
   //(vOrigint*lax).raw_print("VelocityY");
-	mat RHS = acceleration + pgain*positionerror + vgain*velocityerror;
-	// Set constraints
+  mat RHS = acceleration + pgain*positionerror + vgain*velocityerror;
+  // Set constraints
 
   manifold->dmatrix(cmanifold);
-	pErr->dmatrix(positionerror);
-	vErr->dmatrix(velocityerror);
-	aErr->dmatrix(RHS);
+  pErr->dmatrix(positionerror);
+  vErr->dmatrix(velocityerror);
+  aErr->dmatrix(RHS);
   return 0;
 };
 
@@ -83,7 +83,7 @@ int ackermann::getDoFIndex(string dofname) {
 }
 
 void ackermann::ConstraintInit() {
-	// Get wheelbase and dofs
+  // Get wheelbase and dofs
   wheelbase = abs(localNode->child("WheelBase")->dmatrix()(0,0));
   
   vec yawax = normalise(arma::conv_to<vec>::from(localNode->child("YawAxis")->dmatrix().row(0)));
@@ -102,8 +102,8 @@ void ackermann::ConstraintInit() {
   bodyRotation = body->child("RotationMatrix");
   dbodyRotationdt = body->child("dRotationMatrixdt");
   
-	// Get constraint stuff
-	manifold = constraintNode->child("ConstraintManifold");
+  // Get constraint stuff
+  manifold = constraintNode->child("ConstraintManifold");
 }
 
 ackermann::ackermann(NM::DOM::Node *rootTree, int *treeLoc) {
@@ -113,19 +113,19 @@ ackermann::ackermann(NM::DOM::Node *rootTree, int *treeLoc) {
   state = rootNode->child("dynamic")->child("state");
   
   constraintNode = rootNode->getAddElement("environment")->getAddElement("constraints")->addElement("GenericConstraint");
-	int nc = 2;
+  int nc = 2;
   mat znc = zeros(1,nc);
   mat z1 = zeros(1,1);
-	string InstanceName = localNode->child("Name")->text();
-	constraintNode->addAttribute("Type",(string)"generic");
-	constraintNode->addAttribute("Parent",(string)"ground");
-	constraintNode->addAttribute("Name",InstanceName+"_constraint");
-	constraintNode->addElement("MaxConstraints",nc);
-	manifold = NULL; // We'll attach to this later
-	pErr = constraintNode->addElement("PositionError",znc);
-	vErr = constraintNode->addElement("VelocityError",znc);
-	aErr = constraintNode->addElement("Acceleration",znc);
-	pgain = 0;	z1(0,0) = pgain;	constraintNode->addElement("PositionErrorGain",z1);
-	vgain = 0;	z1(0,0) = vgain;	constraintNode->addElement("VelocityErrorGain",z1);
+  string InstanceName = localNode->child("Name")->text();
+  constraintNode->addAttribute("Type",(string)"generic");
+  constraintNode->addAttribute("Parent",(string)"ground");
+  constraintNode->addAttribute("Name",InstanceName+"_constraint");
+  constraintNode->addElement("MaxConstraints",nc);
+  manifold = NULL; // We'll attach to this later
+  pErr = constraintNode->addElement("PositionError",znc);
+  vErr = constraintNode->addElement("VelocityError",znc);
+  aErr = constraintNode->addElement("Acceleration",znc);
+  pgain = 0;	z1(0,0) = pgain;	constraintNode->addElement("PositionErrorGain",z1);
+  vgain = 0;	z1(0,0) = vgain;	constraintNode->addElement("VelocityErrorGain",z1);
 	
 }
