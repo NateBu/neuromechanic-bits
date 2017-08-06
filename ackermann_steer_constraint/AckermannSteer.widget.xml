@@ -6,8 +6,8 @@
 	<calibration name="WheelBase" type="Number" decimal="true" defaultvalue="1"/>
 	<calibration label="Yaw axis in 'Chassis' body coordinates" name="YawAxis" type="String" defaultvalue="0 0 1"/>
 	<calibration label="Velocity axis in 'Chassis' body coordinates" name="VelocityAxis" type="String" defaultvalue="1 0 0"/>
-	<file name="AckermannSteer.cpp" type="file::BioMechanico:widgets/AckermannSteer/AckermannSteer.cpp"/>
-	<file name="AckermannSteer.hpp" type="file::BioMechanico:widgets/AckermannSteer/AckermannSteer.hpp"/>
+	<file name="AckermannSteer.cpp" type="file::NateBunderson:widgets/AckermannSteer/AckermannSteer.cpp"/>
+	<file name="AckermannSteer.hpp" type="file::NateBunderson:widgets/AckermannSteer/AckermannSteer.hpp"/>
 	<script/>
 	<nm>
 		<resources>
