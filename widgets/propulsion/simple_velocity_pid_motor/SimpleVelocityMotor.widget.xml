@@ -1,0 +1,47 @@
+<widget summary="A simple torque/linear motor controlling a dof to a target velocity" name="SimpleVelocityMotor" buildtype="nmplugin">
+	<widget name="NmExternalResources" type="widget::BioMechanico:NmExternalResources">
+		<calibration/>
+	</widget>
+	<signal name=":::CommandTopic:::" action="Subscribe" summary="-" type="signal::NateBunderson:Double"/>
+	<signal name=":::EstopTopic:::" action="Subscribe" summary="-" type="signal::NateBunderson:Estop"/>
+	<calibration name="DegreeOfFreedom" type="DegreeOfFreedom" defaultvalue="_:_"/>
+	<calibration name="TorqueLimit" type="Number" decimal="true" defaultvalue="100"/>
+	<calibration name="PGain" type="Number" decimal="true" defaultvalue=".5"/>
+	<calibration name="IGain" type="Number" decimal="true" defaultvalue="0"/>
+	<calibration name="CommandTopic" type="String" defaultvalue="velocity"/>
+	<calibration name="EstopTopic" type="String" defaultvalue="estop"/>
+	<file name="SimpleVelocityMotor.cpp" type="file::NateBunderson:widgets/SimpleVelocityMotor/SimpleVelocityMotor.cpp"/>
+	<file name="SimpleVelocityMotor.hpp" type="file::NateBunderson:widgets/SimpleVelocityMotor/SimpleVelocityMotor.hpp"/>
+	<society/>
+	<script/>
+	<nm>
+		<resources>
+			<externalclass interval="0" name=":::Name:::" type="ExternalObject" class="natebunderson_w_simplevelocitymotor">
+				<callphase neuron="true"/>
+				<nodename>:::Name:::</nodename>
+				<commandtopic>:::CommandTopic:::</commandtopic>
+				<estoptopic>:::EstopTopic:::</estoptopic>
+				<torque domdatatype="double">0</torque>
+				<pgain domdatatype="double">:::PGain:::</pgain>
+				<dgain domdatatype="double">0</dgain>
+				<igain domdatatype="double">:::IGain:::</igain>
+				<degreeoffreedom>:::DegreeOfFreedom:::</degreeoffreedom>
+			</externalclass>
+		</resources>
+		<muscles>
+			<muscle name=":::Name:::_motor">
+				<motorneuron>:::Name:::_motorsignal</motorneuron>
+				<maxforce>1</maxforce>
+				<model type="User">
+					<torquemotor name=":::DegreeOfFreedom:::"/>
+				</model>
+			</muscle>
+		</muscles>
+		<neurons>
+			<neuron name=":::Name:::_motorsignal" type="NeuralNet">
+				<synapse type="treevalue" name=".^^.NeuromechanicFile.resources.externalclass['Name=:::Name:::'].Torque">1 0</synapse>
+				<outputbounds shaping="saturate">-:::TorqueLimit::: :::TorqueLimit:::</outputbounds>
+			</neuron>
+		</neurons>
+	</nm>
+</widget>
