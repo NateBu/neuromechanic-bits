@@ -1,0 +1,24 @@
+<widget summary="Constrain yaw rate of a bodies chassis with it's forward velocity and steer angle" name="AckermannSteer" buildtype="nmplugin">
+	<widget/>
+	<signal/>
+	<calibration name="Chassis" type="Body" defaultvalue="_:_"/>
+	<calibration name="SteerDoF" type="DegreeOfFreedom" defaultvalue="_:_"/>
+	<calibration name="WheelBase" type="Number" decimal="true" defaultvalue="1"/>
+	<calibration label="Yaw axis in 'Chassis' body coordinates" name="YawAxis" type="String" defaultvalue="0 0 1"/>
+	<calibration label="Velocity axis in 'Chassis' body coordinates" name="VelocityAxis" type="String" defaultvalue="1 0 0"/>
+	<file name="AckermannSteer.cpp" type="file::BioMechanico:widgets/AckermannSteer/AckermannSteer.cpp"/>
+	<file name="AckermannSteer.hpp" type="file::BioMechanico:widgets/AckermannSteer/AckermannSteer.hpp"/>
+	<script/>
+	<nm>
+		<resources>
+			<externalclass interval="0" name=":::Name:::" type="ExternalObject" class="biomechanico_w_ackermannsteer">
+				<callphase environment="true"/>
+				<body>:::Chassis:::</body>
+				<yawaxis domdatatype="double">:::YawAxis:::</yawaxis>
+				<velocityaxis domdatatype="double">:::VelocityAxis:::</velocityaxis>
+				<steeringdof>:::SteerDoF:::</steeringdof>
+				<wheelbase domdatatype="double">:::WheelBase:::</wheelbase>
+			</externalclass>
+		</resources>
+	</nm>
+</widget>
