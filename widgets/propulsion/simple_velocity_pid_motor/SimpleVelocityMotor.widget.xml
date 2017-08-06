@@ -1,5 +1,5 @@
 <widget summary="A simple torque/linear motor controlling a dof to a target velocity" name="SimpleVelocityMotor" buildtype="nmplugin">
-	<widget name="NmExternalResources" type="widget::BioMechanico:NmExternalResources">
+	<widget name="NmExternalResources" type="widget::NateBunderson:NmExternalResources">
 		<calibration/>
 	</widget>
 	<signal name=":::CommandTopic:::" action="Subscribe" summary="-" type="signal::NateBunderson:Double"/>
