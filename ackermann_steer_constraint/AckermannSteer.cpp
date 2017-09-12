@@ -1,12 +1,16 @@
 #include "AckermannSteer.hpp"
 
+//#define WIDGET_ACKERMANNSTEER natebu_w_ackermannsteer
+//#define WIDGET_ACKERMANNSTEER_STRING "natebu_w_ackermannsteer"
+#define :::WIDGET_ACKERMANNSTEER_STRING:::
+
 NM::Widget *widgetmaker(NM::DOM::Node *rootTree, int *treeLoc){
    return new ackermann(rootTree, treeLoc);
 };
 class widgetproxy {
 public:
    widgetproxy(){
-      NM::widgetfactory["biomechanico_w_ackermannsteer"] = widgetmaker;  // register the widgetmaker with the factory
+      NM::widgetfactory[WIDGET_ACKERMANNSTEER_STRING] = widgetmaker;  // register the widgetmaker with the factory
    }
 };
 // our one instance of the widgetproxy
@@ -74,12 +78,12 @@ int ackermann::environment() {
 };
 
 int ackermann::getDoFIndex(string dofname) {
-    auto steerdof_ = rootNode->child("bodies")->progeny("degreeoffreedom","name",dofname);
-    if (steerdof_ == NULL) {
-        cout << "Degree of freedom '" << dofname << "' referenced in AckermannSteer does not exist" << endl;
-        throw 0;
-    }
-    return steerdof_->child("dofindex")->imatrix()(0,0);
+  auto steerdof_ = rootNode->child("bodies")->progeny("degreeoffreedom","name",dofname);
+  if (steerdof_ == NULL) {
+    cout << "Degree of freedom '" << dofname << "' referenced in AckermannSteer does not exist" << endl;
+    throw 0;
+  }
+  return steerdof_->child("dofindex")->imatrix()(0,0);
 }
 
 void ackermann::ConstraintInit() {
@@ -126,6 +130,5 @@ ackermann::ackermann(NM::DOM::Node *rootTree, int *treeLoc) {
   vErr = constraintNode->addElement("VelocityError",znc);
   aErr = constraintNode->addElement("Acceleration",znc);
   pgain = 0;	z1(0,0) = pgain;	constraintNode->addElement("PositionErrorGain",z1);
-  vgain = 0;	z1(0,0) = vgain;	constraintNode->addElement("VelocityErrorGain",z1);
-	
+  vgain = 0;	z1(0,0) = vgain;	constraintNode->addElement("VelocityErrorGain",z1);	
 }
